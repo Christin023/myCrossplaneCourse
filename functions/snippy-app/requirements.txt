@@ -1,0 +1,5 @@
+# The Crossplane Python function SDK. It provides the gRPC server runtime, the
+# generated protobuf types (RunFunctionRequest/Response), and helpers like
+# resource.update() and response.to(). Pin to a known-good minor version.
+crossplane-function-sdk-python>=0.9.0
+grpcio>=1.62.0

@@ -1,0 +1,24 @@
+# Usage enforces deletion ordering between resources. Crossplane is eventually
+# consistent and deletes in parallel, which can orphan resources whose teardown
+# depends on another resource still existing. A Usage says "A is used by B" so
+# Crossplane blocks deletion of A until B is gone (via a webhook).
+#
+# Here: the Snippy ConfigMap must not be deleted while the Deployment that reads
+# it still exists.
+apiVersion: apiextensions.crossplane.io/v1alpha1
+kind: Usage
+metadata:
+  name: deployment-uses-configmap
+  namespace: default
+spec:
+  reason: "Snippy Deployment reads APP_GREETING from the ConfigMap"
+  of:
+    apiVersion: v1
+    kind: ConfigMap
+    resourceRef:
+      name: hello-snippy-config
+  by:
+    apiVersion: apps/v1
+    kind: Deployment
+    resourceRef:
+      name: hello-snippy

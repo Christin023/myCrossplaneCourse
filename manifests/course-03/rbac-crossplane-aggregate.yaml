@@ -1,0 +1,15 @@
+# Crossplane composes resources using its own ServiceAccount. That SA can manage
+# anything a provider or XRD installed, plus Deployments — but NOT arbitrary core
+# resources like ConfigMaps and Services. We grant that access by creating a
+# ClusterRole that AGGREGATES into Crossplane's primary ClusterRole. Crossplane
+# picks it up automatically via the aggregation label.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: crossplane:aggregate-snippystack
+  labels:
+    rbac.crossplane.io/aggregate-to-crossplane: "true"
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "services"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]

@@ -1,0 +1,52 @@
+# Self-service, the v2 way: a developer gets a namespace and permission to create
+# Apps ONLY in that namespace. Because v2 XRs are namespaced, ordinary
+# Kubernetes RBAC is all you need — no claims, no cluster-scoped exposure.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: team-a
+---
+# A Role that lets a developer manage Apps (and read what they compose) but
+# nothing cluster-wide. They cannot see or touch the Composition or XRD.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-developer
+  namespace: team-a
+rules:
+  - apiGroups: ["platform.snippy.io"]
+    resources: ["apps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Read-only visibility into what their App composed.
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps", "pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: app-developer
+  namespace: team-a
+subjects:
+  - kind: User
+    name: dev-alice           # maps to whatever your cluster authenticates
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: app-developer
+  apiGroup: rbac.authorization.k8s.io
+---
+# Alice's self-service request, confined to her namespace.
+apiVersion: platform.snippy.io/v1alpha1
+kind: App
+metadata:
+  name: alice-snippy
+  namespace: team-a
+spec:
+  image: snippy:0.1
+  replicas: 2
+  greeting: "Alice's Snippy"

@@ -1,0 +1,45 @@
+# REFERENCE ONLY — the v1 (pre-v2) way, shown for contrast. Do not mix with the
+# namespaced App above. In v1, XRs were CLUSTER-scoped, and developers requested
+# them through a namespaced "claim" (XRC). The XRD opted in with claimNames and
+# scope: LegacyCluster.
+#
+# v2 removed this split: the XR itself is namespaced, so the claim is gone.
+# Understanding the old model helps you read v1 codebases and migrate them.
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: xapps.legacy.snippy.io
+spec:
+  scope: LegacyCluster          # the old cluster-scoped XR + claim model
+  group: legacy.snippy.io
+  names:
+    kind: XApp                  # the cluster-scoped composite
+    plural: xapps
+  claimNames:
+    kind: AppClaim              # the namespaced claim developers created
+    plural: appclaims
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image: { type: string }
+                replicas: { type: integer }
+              required: [image]
+---
+# A developer's v1 claim (namespaced), which Crossplane bound to a generated
+# cluster-scoped XApp. This indirection is exactly what v2 eliminates.
+apiVersion: legacy.snippy.io/v1alpha1
+kind: AppClaim
+metadata:
+  name: legacy-snippy
+  namespace: team-a
+spec:
+  image: snippy:0.1
+  replicas: 2

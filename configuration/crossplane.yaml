@@ -1,0 +1,24 @@
+# This file turns the SnippyStack API into an installable, versioned OCI package
+# (a "Configuration"). `crossplane xpkg build` bundles this metadata together
+# with everything under ./apis (the XRD + Composition) into a .xpkg image.
+#
+# dependsOn declares the functions this Configuration needs; the package manager
+# installs them automatically when someone installs this Configuration.
+apiVersion: meta.pkg.crossplane.io/v1alpha1
+kind: Configuration
+metadata:
+  name: snippystack
+  annotations:
+    meta.crossplane.io/maintainer: Platform Team
+    meta.crossplane.io/source: github.com/example/snippystack
+    meta.crossplane.io/description: |
+      Self-service Snippy environments via a single platform.snippy.io/App API.
+spec:
+  # Minimum Crossplane version that understands namespaced XRs + functions.
+  crossplane:
+    version: ">=v2.0.0"
+  dependsOn:
+    - function: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform
+      version: ">=v0.8.0"
+    - function: xpkg.crossplane.io/crossplane-contrib/function-auto-ready
+      version: ">=v0.4.0"

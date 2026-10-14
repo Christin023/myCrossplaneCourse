@@ -1,0 +1,46 @@
+# Every Managed Resource exposes two levers that control the reconcile loop's
+# authority over the external object.
+#
+# deletionPolicy: what happens to the EXTERNAL object when you delete the MR.
+#   - Delete (default): delete the external object too.
+#   - Orphan: leave the external object behind; just forget about it.
+---
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: orphan-demo
+spec:
+  deletionPolicy: Orphan        # delete this MR and the ConfigMap survives
+  providerConfigRef:
+    name: default
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: orphan-demo
+        namespace: default
+      data:
+        note: "I outlive my Managed Resource"
+---
+# managementPolicies: which of the four verbs the provider may perform.
+#   ["*"]                     full control (default)
+#   ["Observe"]               read-only import; never create/update/delete
+#   ["Observe","Create","Update"]  manage but never delete, etc.
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: partial-mgmt-demo
+spec:
+  managementPolicies: ["Observe", "Create", "Update"]   # no Delete
+  providerConfigRef:
+    name: default
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: partial-mgmt-demo
+        namespace: default
+      data:
+        note: "provider will create/update me but never delete me"

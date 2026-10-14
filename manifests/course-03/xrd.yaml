@@ -1,0 +1,47 @@
+# The CompositeResourceDefinition (XRD) defines a NEW API: platform.snippy.io/App.
+# This is your platform's public contract — the only thing developers see.
+# In Crossplane v2 we use scope: Namespaced, so an App lives in a namespace and
+# is governed by ordinary Kubernetes RBAC (see Course 5). No claims needed.
+apiVersion: apiextensions.crossplane.io/v1
+kind: CompositeResourceDefinition
+metadata:
+  name: apps.platform.snippy.io
+spec:
+  scope: Namespaced
+  group: platform.snippy.io
+  names:
+    kind: App
+    plural: apps
+  versions:
+    - name: v1alpha1
+      served: true
+      referenceable: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                image:
+                  type: string
+                  description: Container image for the Snippy app.
+                replicas:
+                  type: integer
+                  description: How many Snippy replicas to run.
+                  default: 1
+                greeting:
+                  type: string
+                  description: Greeting banner Snippy displays.
+                  default: "Hello from SnippyStack"
+              required:
+                - image
+            status:
+              type: object
+              properties:
+                ready:
+                  type: boolean
+                  description: True when all composed resources are ready.
+                url:
+                  type: string
+                  description: In-cluster URL of the Snippy Service.

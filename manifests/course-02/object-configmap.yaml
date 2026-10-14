@@ -1,0 +1,20 @@
+# A REAL Managed Resource. provider-kubernetes wraps an arbitrary Kubernetes
+# object (here a ConfigMap) as an MR of kind Object. Crossplane now owns that
+# ConfigMap: it creates it, and continuously reconciles it back to this desired
+# state. Edit the real ConfigMap by hand and watch the provider revert it.
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: snippy-greeting
+spec:
+  providerConfigRef:
+    name: default
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: snippy-greeting
+        namespace: default
+      data:
+        greeting: "Hello from a Crossplane-managed ConfigMap"

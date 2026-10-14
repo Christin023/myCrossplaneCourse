@@ -1,0 +1,18 @@
+# A Composition whose entire pipeline is a SINGLE custom function. No
+# patch-and-transform input — all the logic lives in function.py.
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: app.platform.snippy.io
+spec:
+  compositeTypeRef:
+    apiVersion: platform.snippy.io/v1alpha1
+    kind: App
+  mode: Pipeline
+  pipeline:
+    - step: compose-snippy
+      functionRef:
+        name: function-snippy-app
+    - step: ready
+      functionRef:
+        name: function-auto-ready

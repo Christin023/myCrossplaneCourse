@@ -1,0 +1,41 @@
+# DeploymentRuntimeConfig controls HOW a provider (or function) pod runs:
+# resources, replicas, nodeSelector, the ServiceAccount it uses, security
+# context, and more. This is the production replacement for the old
+# ControllerConfig. Attach it to a Provider via spec.runtimeConfigRef.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: DeploymentRuntimeConfig
+metadata:
+  name: provider-hardened
+spec:
+  serviceAccountTemplate:
+    metadata:
+      name: provider-kubernetes          # a named SA you can bind least-privilege RBAC to
+  deploymentTemplate:
+    spec:
+      replicas: 1
+      selector: {}
+      template:
+        spec:
+          containers:
+            - name: package-runtime
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+                limits:
+                  cpu: "1"
+                  memory: 512Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                runAsNonRoot: true
+---
+# Bind the provider to the runtime config above.
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-kubernetes
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-kubernetes:v0.18.0
+  runtimeConfigRef:
+    name: provider-hardened

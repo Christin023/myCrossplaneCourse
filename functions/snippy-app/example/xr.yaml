@@ -1,0 +1,9 @@
+apiVersion: platform.snippy.io/v1alpha1
+kind: App
+metadata:
+  name: example-snippy
+  namespace: default
+spec:
+  image: snippy:0.1
+  replicas: 3
+  greeting: "Hello from my own function"

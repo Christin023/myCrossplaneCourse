@@ -1,0 +1,21 @@
+# Used by `crossplane render`. The Development runtime annotation tells the CLI
+# NOT to pull/run an image for this function, but to connect to a function you're
+# running locally (python main.py --insecure) on localhost:9443. That gives you
+# an edit-run-see loop with no build step.
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-snippy-app
+  annotations:
+    render.crossplane.io/runtime: Development
+spec:
+  # Ignored for Development runtime, but required by the schema.
+  package: function-snippy-app
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-auto-ready
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/function-auto-ready:v0.4.1

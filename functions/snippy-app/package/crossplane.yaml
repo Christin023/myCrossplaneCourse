@@ -1,0 +1,15 @@
+# Package metadata for the function. `crossplane xpkg build -f package
+# --embed-runtime-image=snippy-app-fn` turns this + the runtime image into an
+# installable Function package, just like function-patch-and-transform.
+apiVersion: meta.pkg.crossplane.io/v1beta1
+kind: Function
+metadata:
+  name: function-snippy-app
+  annotations:
+    meta.crossplane.io/maintainer: Platform Team
+    meta.crossplane.io/description: |
+      Composes a Snippy environment (ConfigMap + Deployment + Service) from a
+      platform.snippy.io/App composite resource.
+spec:
+  crossplane:
+    version: ">=v2.0.0"

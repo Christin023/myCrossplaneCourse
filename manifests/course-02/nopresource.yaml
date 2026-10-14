@@ -1,0 +1,20 @@
+# A Managed Resource with no real backend. Creating this makes provider-nop's
+# controller run a full reconcile loop against... nothing. Use it to watch the
+# MR lifecycle: SYNCED and READY conditions, events, and how conditions are
+# faked here so you can study them. `kubectl get managed` lists ALL MRs.
+apiVersion: nop.crossplane.io/v1alpha1
+kind: NopResource
+metadata:
+  name: hello-nop
+spec:
+  forProvider:
+    # provider-nop lets you script the conditions it reports back, so you can
+    # simulate an external resource that takes time to become ready.
+    conditionAfter:
+      - conditionType: Ready
+        conditionStatus: "False"
+        time: 0s
+      - conditionType: Ready
+        conditionStatus: "True"
+        time: 10s
+  # No providerConfigRef needed: provider-nop has no external system to reach.

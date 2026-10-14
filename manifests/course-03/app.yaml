@@ -1,0 +1,12 @@
+# A developer's entire request. This one resource is your platform's public API.
+# Applying it makes Crossplane run the Composition and materialize a ConfigMap +
+# Deployment + Service for Snippy in this namespace.
+apiVersion: platform.snippy.io/v1alpha1
+kind: App
+metadata:
+  name: hello-snippy
+  namespace: default
+spec:
+  image: snippy:0.1
+  replicas: 2
+  greeting: "Hello from my first composite API"

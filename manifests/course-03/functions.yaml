@@ -1,0 +1,20 @@
+# Compositions in Crossplane v2 are pipelines of FUNCTIONS. These two are the
+# workhorses used across the series:
+#   - function-patch-and-transform: the modern form of classic "patch & transform".
+#     It builds composed resources from templates and patches values onto them.
+#   - function-auto-ready: inspects the composed resources and marks the XR Ready
+#     when they are all Ready, so you don't wire readiness by hand.
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-patch-and-transform
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/function-patch-and-transform:v0.8.2
+---
+apiVersion: pkg.crossplane.io/v1
+kind: Function
+metadata:
+  name: function-auto-ready
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/function-auto-ready:v0.4.1

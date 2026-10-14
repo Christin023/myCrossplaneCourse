@@ -1,0 +1,22 @@
+# Same API, two very different environments — produced from ONE Composition.
+# This is the payoff: developers only change a few fields.
+---
+apiVersion: platform.snippy.io/v1alpha1
+kind: App
+metadata:
+  name: snippy-dev
+  namespace: default
+spec:
+  image: snippy:0.1
+  replicas: 1
+  greeting: "Snippy (dev)"
+---
+apiVersion: platform.snippy.io/v1alpha1
+kind: App
+metadata:
+  name: snippy-prod
+  namespace: default
+spec:
+  image: snippy:0.1
+  replicas: 4
+  greeting: "Snippy (prod)"

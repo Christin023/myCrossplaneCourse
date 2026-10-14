@@ -1,0 +1,10 @@
+# provider-nop is a teaching provider: its NopResource Managed Resource has NO
+# real external backend. It just lets you watch the reconcile loop, conditions,
+# and lifecycle of an MR without needing cloud credentials. Perfect for learning
+# the *mechanics* of a Managed Resource in isolation.
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-nop
+spec:
+  package: xpkg.crossplane.io/crossplane-contrib/provider-nop:v0.4.0

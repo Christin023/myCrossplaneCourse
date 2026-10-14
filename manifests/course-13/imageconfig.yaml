@@ -1,0 +1,17 @@
+# ImageConfig centralizes policy for the OCI images Crossplane pulls (providers,
+# functions, configurations). Two common uses:
+#   1. Pull private packages with a registry pull secret.
+#   2. Rewrite / pin a registry prefix.
+# It matches packages by image prefix.
+apiVersion: pkg.crossplane.io/v1beta1
+kind: ImageConfig
+metadata:
+  name: private-registry-auth
+spec:
+  matchImages:
+    - type: Prefix
+      prefix: registry.example.com/platform/
+  registry:
+    authentication:
+      pullSecretRef:
+        name: registry-credentials       # a docker-registry Secret in crossplane-system

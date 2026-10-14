@@ -1,0 +1,117 @@
+# The Composition is the IMPLEMENTATION of the App API. One App fans out into
+# three composed resources: a ConfigMap, a Deployment, and a Service.
+#
+# In Crossplane v2 a Composition can compose NATIVE Kubernetes resources directly
+# (no provider-kubernetes needed). Because the App XR is Namespaced, these
+# composed resources land in the App's own namespace.
+#
+# NOTE: Crossplane's ServiceAccount can create Deployments out of the box, but
+# you must grant it access to compose ConfigMaps and Services. Apply
+# rbac-crossplane-aggregate.yaml alongside this file.
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: app.platform.snippy.io
+spec:
+  compositeTypeRef:
+    apiVersion: platform.snippy.io/v1alpha1
+    kind: App
+  mode: Pipeline
+  pipeline:
+    - step: render-resources
+      functionRef:
+        name: function-patch-and-transform
+      input:
+        apiVersion: pt.fn.crossplane.io/v1beta1
+        kind: Resources
+        resources:
+          # ---------- ConfigMap: holds the greeting ----------
+          - name: configmap
+            base:
+              apiVersion: v1
+              kind: ConfigMap
+              metadata: {}
+              data:
+                greeting: "placeholder"
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+                transforms:
+                  - type: string
+                    string:
+                      type: Format
+                      fmt: "%s-config"
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.greeting
+                toFieldPath: data.greeting
+
+          # ---------- Deployment: runs Snippy ----------
+          - name: deployment
+            base:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata: {}
+              spec:
+                selector:
+                  matchLabels:
+                    app: snippy
+                template:
+                  metadata:
+                    labels:
+                      app: snippy
+                  spec:
+                    containers:
+                      - name: snippy
+                        image: "placeholder"
+                        ports:
+                          - containerPort: 8080
+                        env:
+                          - name: APP_GREETING
+                            value: "placeholder"
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+              # Give each App's resources a unique label so Services select the
+              # right Pods even when two Apps share a namespace.
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.selector.matchLabels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.template.metadata.labels.app
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.replicas
+                toFieldPath: spec.replicas
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.image
+                toFieldPath: spec.template.spec.containers[0].image
+              - type: FromCompositeFieldPath
+                fromFieldPath: spec.greeting
+                toFieldPath: spec.template.spec.containers[0].env[0].value
+
+          # ---------- Service: stable address for Snippy ----------
+          - name: service
+            base:
+              apiVersion: v1
+              kind: Service
+              metadata: {}
+              spec:
+                ports:
+                  - port: 80
+                    targetPort: 8080
+                selector:
+                  app: snippy
+            patches:
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: metadata.name
+              - type: FromCompositeFieldPath
+                fromFieldPath: metadata.name
+                toFieldPath: spec.selector.app
+
+    # Mark the App Ready once the ConfigMap, Deployment and Service are Ready.
+    - step: ready
+      functionRef:
+        name: function-auto-ready

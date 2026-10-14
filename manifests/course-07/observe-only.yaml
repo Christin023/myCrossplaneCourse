@@ -1,0 +1,24 @@
+# Observe-only: import an EXISTING external object into Crossplane's view without
+# ever modifying it. The provider runs Observe but is forbidden from Create,
+# Update, or Delete. This is how you adopt pre-existing infrastructure safely,
+# or build read-only "status mirrors".
+#
+# First create something out-of-band to observe:
+#   kubectl create configmap preexisting --from-literal=owner=someone-else
+#
+# Then this MR will find and report it, but leave it untouched.
+apiVersion: kubernetes.crossplane.io/v1alpha2
+kind: Object
+metadata:
+  name: observe-preexisting
+spec:
+  managementPolicies: ["Observe"]
+  providerConfigRef:
+    name: default
+  forProvider:
+    manifest:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: preexisting
+        namespace: default
